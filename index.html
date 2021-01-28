@@ -4,26 +4,29 @@
         <meta charset="utf-8" />
         <title>Gamedev Canvas Workshop</title>
         <style>
-            * {padding: 0; margin: 0;}
-            canvas {background: #eee; display: block; margin: 0 auto;}
+            @import url(https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap);
+            * {padding: 0; margin: 0; font-family: "Press Start 2P";}
+            canvas {background: #eee; display: block; margin: 0 auto; font-family: "Press Start 2P";}
         </style>
     </head>
     <body>
-        <canvas id="myCanvas" width="480" height="320"></canvas>
+        <span style='font-family: "Press Start 2P", cursive;'>.</span>
+        <canvas id="myCanvas" width="480" height="360"></canvas>
         <script>
             var canvas = document.getElementById("myCanvas");
             var ctx = canvas.getContext("2d");
             var x = canvas.width / 2;
             var y = canvas.height - 30;
-            var dx = 1;
-            var dy = -1;
+            var dx = 2;
+            var dy = -2;
             var ballRadius = 10;
             var paddleHeight = 10;
             var paddleWidth = 75;
             var paddleX = (canvas.width - paddleWidth) / 2;
+            var paddleY = (canvas.height - paddleHeight)
             var rightPressed = false;
             var leftPressed = false;
-            var brickRowCount = 3;
+            var brickRowCount = 5;
             var brickColumnCount = 5;
             var brickWidth = 75;
             var brickHeight = 20;
@@ -51,8 +54,7 @@
 
             function drawPaddle() {
                 ctx.beginPath();
-                //i changed y with -4 to make it off the bottom
-                ctx.rect(paddleX, canvas.height - paddleHeight - 4, paddleWidth, paddleHeight);
+                ctx.rect(paddleX, paddleY - 2, paddleWidth, paddleHeight);
                 ctx.strokeStyle = "#6f0b4d";
                 ctx.lineWidth = 2.5;
                 ctx.stroke();
@@ -68,9 +70,14 @@
                             bricks[c][r].x = brickX;
                             bricks[c][r].y = brickY;
 
+                            var gradient = ctx.createLinearGradient(0, 30, 0, 160)
+                            gradient.addColorStop("0", "#6f0b4d");
+                            gradient.addColorStop("0.5", "#cd0b4d");
+                            gradient.addColorStop("1.0", "#ffb8c0");
+
                             ctx.beginPath();
                             ctx.rect(brickX, brickY, brickWidth, brickHeight);
-                            ctx.fillStyle = "#6f0b4d";
+                            ctx.fillStyle = gradient;
                             ctx.fill();
                             ctx.closePath();
                         }
@@ -83,7 +90,7 @@
                     for(var r = 0; r < brickRowCount; r++) {
                         var b = bricks[c][r];
                         if(b.status == 1) {
-                            if(x > b.x && x < b.x + brickWidth && y > b.y && y < b.y + brickHeight) {
+                            if(x > b.x - ballRadius && x < b.x + brickWidth + ballRadius && y > b.y - ballRadius && y < b.y + brickHeight + ballRadius) {
                                 dy = -dy;
                                 b.status = 0;
                                 score++;
@@ -98,13 +105,13 @@
             }
 
             function drawScore() {
-                ctx.font = "16px Arial";
+                ctx.font = "40px Press Start 2P";
                 ctx.fillStyle = "#6f0b4d";
                 ctx.fillText("Score: "+score, 10, 20);
             }
 
             function drawLives() {
-                ctx.font = "16px Arial";
+                ctx.font = "40px Press Start 2P";
                 ctx.fillStyle = "#6f0b4d";
                 ctx.fillText("Lives: " + lives, canvas.width - 65, 20);
             }
@@ -126,8 +133,11 @@
                 if(y + dy < ballRadius) {
                     dy = -dy;
                 } 
-                else if(y + dy > canvas.height - ballRadius) {
-                    if(x > paddleX && x < paddleX + paddleWidth) {
+                //try to figure out better way to do this, so the ball still has to go to the bottom of the canvas
+                //that means that even if the edge of the ball goes below the paddle the paddle could still hit it away from a game over
+                //the game over notif happens when the ball touches an invisible area the same height as the paddle and i dislike it
+                else if(y + dy > paddleY - ballRadius) {
+                    if(x > paddleX - ballRadius && x < paddleX + paddleWidth + ballRadius) {
                         dy = -dy;
                     }
                     else {
@@ -139,8 +149,8 @@
                         else {
                             x = canvas.width / 2;
                             y = canvas.height - 30;
-                            dx = 1;
-                            dy = -1;
+                            dx = 2;
+                            dy = -2;
                             paddleX = (canvas.width - paddleWidth) / 2;
                         }
                     }
@@ -163,6 +173,7 @@
             document.addEventListener("mousemove", mouseMoveHandler, false);
 
             function mouseMoveHandler(e) {
+                //fix this bullshit
                 var relativeX = e.clientX - canvas.offsetLeft;
                 if(relativeX > 0 && relativeX < canvas.width) {
                     paddleX = relativeX - paddleWidth / 2;
