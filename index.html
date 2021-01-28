@@ -133,9 +133,6 @@
                 if(y + dy < ballRadius) {
                     dy = -dy;
                 } 
-                //try to figure out better way to do this, so the ball still has to go to the bottom of the canvas
-                //that means that even if the edge of the ball goes below the paddle the paddle could still hit it away from a game over
-                //the game over notif happens when the ball touches an invisible area the same height as the paddle and i dislike it
                 else if(y + dy > paddleY - ballRadius) {
                     if(x > paddleX - ballRadius && x < paddleX + paddleWidth + ballRadius) {
                         dy = -dy;
@@ -173,9 +170,8 @@
             document.addEventListener("mousemove", mouseMoveHandler, false);
 
             function mouseMoveHandler(e) {
-                //fix this bullshit
                 var relativeX = e.clientX - canvas.offsetLeft;
-                if(relativeX > 0 && relativeX < canvas.width) {
+                if(relativeX > (paddleWidth / 2) && relativeX < canvas.width - (paddleWidth / 2)) {
                     paddleX = relativeX - paddleWidth / 2;
                 }
             }
